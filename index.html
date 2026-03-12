@@ -1477,6 +1477,54 @@
             width: 20px;
             height: 20px;
         }
+
+        /* ===== Floating Dashboard Nav ===== */
+        #dash-nav-bar {
+            display: flex;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--bg-glass);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        #dash-nav-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .dash-nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: all var(--transition);
+        }
+
+        .dash-nav-btn:hover {
+            background: var(--hover-bg);
+            color: var(--hover-text);
+            border-color: var(--border-glow);
+        }
+
+        .dash-nav-btn.active {
+            background: var(--active-bg);
+            color: var(--active-text);
+            border-color: var(--accent-primary);
+        }
     </style>
 </head>
 
@@ -1870,6 +1918,25 @@
                             </div>
                         </div>
 
+                        <!-- Floating Dashboard Navigation (Mobile/Desktop) -->
+                        <div id="dash-nav-bar">
+                            <button class="dash-nav-btn active" data-url="tong-quan">
+                                🏠 Tổng Quan
+                            </button>
+                            <button class="dash-nav-btn" data-url="xu-huong">
+                                ⚠️ Rủi ro
+                            </button>
+                            <button class="dash-nav-btn" data-url="tac-dong">
+                                👥 Xã hội
+                            </button>
+                            <button class="dash-nav-btn" data-url="danh-gia">
+                                🎯 Chất lượng
+                            </button>
+                            <button class="dash-nav-btn" data-url="dac-tinh">
+                                ⚡ Vật lý
+                            </button>
+                        </div>
+
                         <!-- Dashboard Container -->
                         <div class="dashboard" id="dashboard">
                             <!-- Loading Overlay -->
@@ -2012,6 +2079,11 @@
                             el.classList.remove('active');
                         }
                     });
+                    
+                    // Clear active state of dash-nav-bar
+                    document.querySelectorAll('.dash-nav-btn').forEach(function (btn) {
+                        btn.classList.remove('active');
+                    });
                 }
 
                 function showDashboard(key, name) {
@@ -2027,6 +2099,15 @@
                     iframe.src = url;
                     nameDisplay.textContent = name;
                     updateDescription(name);
+
+                    // Sync active state of dash-nav-bar
+                    document.querySelectorAll('.dash-nav-btn').forEach(function (btn) {
+                        if (btn.getAttribute('data-url') === key) {
+                            btn.classList.add('active');
+                        } else {
+                            btn.classList.remove('active');
+                        }
+                    });
 
                     console.log('[Dashboard] Switching to:', key, '\u2192', url);
                 }
@@ -2125,6 +2206,24 @@
 
                         // Close sidebar on mobile
                         if (window.innerWidth <= 900) closeSidebar();
+                    });
+                });
+
+                // === Click handler: dash nav bar ===
+                document.querySelectorAll('.dash-nav-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var key = btn.getAttribute('data-url');
+                        if (!key) return;
+                        
+                        var sidebarBtn = dashboardNav.querySelector('.sidebar__item[data-page="' + key + '"]');
+                        var name = sidebarBtn ? sidebarBtn.getAttribute('data-name') : '';
+                        
+                        dashboardNav.querySelectorAll('.sidebar__item').forEach(function (el) {
+                            el.classList.remove('active');
+                        });
+                        if(sidebarBtn) sidebarBtn.classList.add('active');
+                        
+                        showDashboard(key, name);
                     });
                 });
 
